@@ -56,7 +56,7 @@
         
         <div class="form-row">
           <div class="form-group">
-            <label for="priceMin">Preço Mínimo (R$)</label>
+            <label for="priceMin">Preço Mínimo ($)</label>
             <input 
               type="number" 
               id="priceMin" 
@@ -66,7 +66,7 @@
               step="0.01">
           </div>
           <div class="form-group">
-            <label for="priceMax">Preço Máximo (R$)</label>
+            <label for="priceMax">Preço Máximo ($)</label>
             <input 
               type="number" 
               id="priceMax" 
@@ -186,14 +186,8 @@
           <div class="service-details">
             <div class="detail-item">
               <span class="material-icons">attach_money</span>
-              <span>R$ {{ service.priceRange.min | number:'1.2-2' }} - R$ {{ service.priceRange.max | number:'1.2-2' }}</span>
+              <span>${{ service.priceRange.min | number:'1.2-2' }} - ${{ service.priceRange.max | number:'1.2-2' }}</span>
             </div>
-            @if (service.duration && service.duration > 0) {
-              <div class="detail-item">
-                <span class="material-icons">schedule</span>
-                <span>{{ service.duration }}h</span>
-              </div>
-            }
             <div class="detail-item">
               <span class="material-icons">category</span>
               <span>{{ getCategoryLabel(service.category) }}</span>
