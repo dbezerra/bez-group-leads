@@ -1,0 +1,215 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1>
+      @if (currentUser?.type === 'admin') {
+        BEZ Leads - Administrative Dashboard
+      } @else {
+        BEZ Leads - My Dashboard
+      }
+    </h1>
+    <p>
+      @if (currentUser?.type === 'admin') {
+        Professional Services Management System
+      } @else {
+        Welcome, {{ currentUser?.name }}!
+      }
+    </p>
+  </div>
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading data...</p>
+    </div>
+  } @else {
+    @if (currentUser?.type === 'admin') {
+      <!-- Admin Dashboard -->
+      @if (stats) {
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon leads">
+              <span class="material-icons">person_add</span>
+            </div>
+            <div class="stat-content">
+              <h3>{{ stats.totalLeads }}</h3>
+              <p>Total Leads</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon customers">
+              <span class="material-icons">people</span>
+            </div>
+            <div class="stat-content">
+              <h3>{{ stats.totalCustomers }}</h3>
+              <p>Registered Workers</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon services">
+              <span class="material-icons">work</span>
+            </div>
+            <div class="stat-content">
+              <h3>{{ stats.totalServices }}</h3>
+              <p>Active Services</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon revenue">
+              <span class="material-icons">attach_money</span>
+            </div>
+            <div class="stat-content">
+              <h3>${{ stats.totalValue | number:'1.2-2' }}</h3>
+              <p>Total Value</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <!-- Leads by Status -->
+          <div class="chart-card">
+            <h3>Leads by Status</h3>
+            <div class="chart-content">
+              @for (item of stats.leadsByStatus | keyvalue; track item.key) {
+                <div class="chart-item">
+                  <div class="chart-bar">
+                    <div 
+                      class="bar-fill" 
+                      [style.width.%]="(item.value / stats.totalLeads) * 100"
+                      [style.background-color]="getStatusColor(item.key)">
+                    </div>
+                  </div>
+                  <div class="chart-label">
+                    <span class="status-dot" [style.background-color]="getStatusColor(item.key)"></span>
+                    <span>{{ getStatusLabel(item.key) }}</span>
+                    <span class="count">({{ item.value }})</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Recent Leads -->
+          <div class="activity-card">
+            <h3>Recent Leads</h3>
+            <div class="activity-list">
+              @for (lead of stats.recentLeads; track lead.id) {
+                <div class="activity-item">
+                  <div class="activity-avatar">
+                    <span class="material-icons">person</span>
+                  </div>
+                  <div class="activity-content">
+                    <h4>{{ lead.name }}</h4>
+                    <p>{{ lead.serviceType }}</p>
+                    <span class="activity-time">{{ lead.createdAt | date:'MM/dd/yyyy' }}</span>
+                  </div>
+                  <div class="activity-status">
+                    <span 
+                      class="status-badge" 
+                      [style.background-color]="getStatusColor(lead.status)">
+                      {{ getStatusLabel(lead.status) }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    } @else {
+      <!-- Worker Dashboard -->
+      @if (workerStats) {
+        <!-- Worker Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon bezcoins">
+              <span class="material-icons">monetization_on</span>
+            </div>
+            <div class="stat-content">
+              <h3>{{ workerStats.bezCoins }}</h3>
+              <p>BEZCoins</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon jobs">
+              <span class="material-icons">work</span>
+            </div>
+            <div class="stat-content">
+              <h3>{{ workerStats.completedJobs }}</h3>
+              <p>Completed Jobs</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon rating">
+              <span class="material-icons">star</span>
+            </div>
+            <div class="stat-content">
+              <h3>{{ workerStats.rating }}</h3>
+              <p>Rating</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon leads">
+              <span class="material-icons">assignment</span>
+            </div>
+            <div class="stat-content">
+              <h3>{{ workerStats.qualifiedLeads }}</h3>
+              <p>Qualified Leads</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Qualified Leads -->
+        <div class="qualified-leads">
+          <h3>Leads Qualified for You</h3>
+          @if (qualifiedLeads.length > 0) {
+            <div class="leads-grid">
+              @for (lead of qualifiedLeads; track lead.id) {
+                <div class="lead-card">
+                  <div class="lead-header">
+                    <h4>{{ lead.name }}</h4>
+                    <span 
+                      class="urgency-badge" 
+                      [style.background-color]="getUrgencyColor(lead.urgency)">
+                      {{ getUrgencyLabel(lead.urgency) }}
+                    </span>
+                  </div>
+                  
+                  <div class="lead-info">
+                    <p><strong>Service:</strong> {{ lead.serviceType }}</p>
+                    <p><strong>Value:</strong> ${{ lead.value | number:'1.2-2' }}</p>
+                    <p><strong>Duration:</strong> {{ lead.estimatedDuration }}h</p>
+                    <p><strong>Location:</strong> {{ lead.location.neighborhood }}, {{ lead.location.city }}</p>
+                  </div>
+                  
+                  <div class="lead-footer">
+                    <span class="visibility-cost">
+                      <span class="material-icons">visibility</span>
+                      {{ lead.visibilityCost }} BEZCoins
+                    </span>
+                    <button class="btn btn-primary" [disabled]="workerStats.bezCoins < lead.visibilityCost">
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <span class="material-icons">assignment</span>
+              <h3>No qualified leads</h3>
+              <p>There are no leads available that match your skills at the moment.</p>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+</div>

@@ -1,0 +1,78 @@
+<div class="layout">
+  <!-- Mobile Overlay -->
+  @if (isSidebarOpen) {
+    <div class="mobile-overlay" (click)="toggleSidebar()"></div>
+  }
+  
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="!isSidebarOpen">
+    <div class="sidebar-header">
+      <app-logo size="medium" variant="light"></app-logo>
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span class="material-icons">{{ isSidebarOpen ? 'menu_open' : 'menu' }}</span>
+      </button>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        @for (item of getMenuItems(); track item.path) {
+          <li class="nav-item">
+            <a 
+              class="nav-link" 
+              [routerLink]="item.path" 
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{exact: false}"
+              (click)="onMobileNavClick()">
+              <span class="material-icons">{{ item.icon }}</span>
+              <span class="nav-label" [class.hidden]="!isSidebarOpen">{{ item.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" [class.sidebar-collapsed]="!isSidebarOpen">
+    <header class="main-header">
+      <div class="header-content">
+        <div class="header-left">
+          <button class="mobile-menu-btn" (click)="toggleSidebar()">
+            <span class="material-icons">menu</span>
+          </button>
+          <h2 class="page-title">
+            @if (currentUser?.type === 'admin') {
+              BEZ Leads - Administration
+            } @else {
+              BEZ Leads - Worker
+            }
+          </h2>
+        </div>
+        
+        <div class="header-right">
+          @if (currentUser?.type === 'worker') {
+            <div class="bezcoins-info">
+              <span class="material-icons">monetization_on</span>
+              <span class="bezcoins-amount">{{ getUserBezCoins() }}</span>
+              <span class="bezcoins-label">BEZCoins</span>
+            </div>
+          }
+          
+          <div class="user-info">
+            <div class="user-details">
+              <span class="user-name">{{ currentUser?.name }}</span>
+              <span class="user-type">{{ getUserTypeLabel() }}</span>
+            </div>
+            <button class="logout-btn" (click)="logout()">
+              <span class="material-icons">logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

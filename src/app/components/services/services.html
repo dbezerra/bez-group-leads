@@ -1,0 +1,245 @@
+<div class="services">
+  <div class="services-header">
+    <h1>Serviços</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
+        <span class="material-icons">add</span>
+        Novo Serviço
+      </button>
+    </div>
+  </div>
+
+  <!-- Add Service Form -->
+  @if (showAddForm) {
+    <div class="add-form">
+      <div class="form-header">
+        <h3>Adicionar Novo Serviço</h3>
+        <button class="close-btn" (click)="showAddForm = false">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="addService()" class="form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Nome *</label>
+            <input 
+              type="text" 
+              id="name" 
+              [(ngModel)]="newService.name" 
+              name="name" 
+              required>
+          </div>
+          <div class="form-group">
+            <label for="category">Categoria</label>
+            <select id="category" [(ngModel)]="newService.category" name="category">
+              <option value="consulting">Consultoria</option>
+              <option value="development">Desenvolvimento</option>
+              <option value="design">Design</option>
+              <option value="marketing">Marketing</option>
+              <option value="support">Suporte</option>
+              <option value="other">Outro</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Descrição *</label>
+          <textarea 
+            id="description" 
+            [(ngModel)]="newService.description" 
+            name="description" 
+            rows="3"
+            required>
+          </textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="priceMin">Preço Mínimo (R$)</label>
+            <input 
+              type="number" 
+              id="priceMin" 
+              [(ngModel)]="newService.priceRange.min" 
+              name="priceMin" 
+              min="0" 
+              step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="priceMax">Preço Máximo (R$)</label>
+            <input 
+              type="number" 
+              id="priceMax" 
+              [(ngModel)]="newService.priceRange.max" 
+              name="priceMax" 
+              min="0" 
+              step="0.01">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="estimatedWorkers">Workers Necessários</label>
+            <input 
+              type="number" 
+              id="estimatedWorkers" 
+              [(ngModel)]="newService.estimatedWorkers" 
+              name="estimatedWorkers" 
+              min="1">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" [(ngModel)]="newService.status" name="status">
+              <option value="active">Ativo</option>
+              <option value="inactive">Inativo</option>
+              <option value="archived">Arquivado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="difficulty">Dificuldade</label>
+            <select id="difficulty" [(ngModel)]="newService.difficulty" name="difficulty">
+              <option value="easy">Fácil</option>
+              <option value="medium">Médio</option>
+              <option value="hard">Difícil</option>
+              <option value="expert">Especialista</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="showAddForm = false">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Adicionar Serviço
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <span class="material-icons">search</span>
+      <input 
+        type="text" 
+        placeholder="Buscar serviços..." 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearchChange()">
+    </div>
+    
+    <div class="filter-group">
+      <label for="categoryFilter">Categoria:</label>
+      <select id="categoryFilter" [(ngModel)]="categoryFilter" (change)="onCategoryFilterChange()">
+        <option value="all">All Categories</option>
+        <option value="construction">Construction</option>
+        <option value="electrical">Electrical</option>
+        <option value="plumbing">Plumbing</option>
+        <option value="cleaning">Cleaning</option>
+        <option value="painting">Painting</option>
+        <option value="landscaping">Landscaping</option>
+        <option value="hvac">HVAC</option>
+        <option value="roofing">Roofing</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Services List -->
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando serviços...</p>
+    </div>
+  } @else {
+    <div class="services-list">
+      @for (service of filteredServices; track service.id) {
+        <div class="service-card">
+          <div class="service-header">
+            <div class="service-info">
+              <h3>{{ service.name }}</h3>
+              <p>{{ getCategoryLabel(service.category) }}</p>
+            </div>
+            <div class="service-actions">
+              <select 
+                [value]="service.status" 
+                (change)="onStatusChange(service, $event)"
+                class="status-select">
+                <option value="active">Ativo</option>
+                <option value="inactive">Inativo</option>
+                <option value="archived">Arquivado</option>
+              </select>
+              <button class="btn-icon" (click)="deleteService(service)">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="service-description">
+            <p>{{ service.description }}</p>
+          </div>
+          
+          <div class="service-details">
+            <div class="detail-item">
+              <span class="material-icons">attach_money</span>
+              <span>R$ {{ service.priceRange.min | number:'1.2-2' }} - R$ {{ service.priceRange.max | number:'1.2-2' }}</span>
+            </div>
+            @if (service.duration && service.duration > 0) {
+              <div class="detail-item">
+                <span class="material-icons">schedule</span>
+                <span>{{ service.duration }}h</span>
+              </div>
+            }
+            <div class="detail-item">
+              <span class="material-icons">category</span>
+              <span>{{ getCategoryLabel(service.category) }}</span>
+            </div>
+          </div>
+          
+          <div class="service-footer">
+            <span 
+              class="status-badge" 
+              [style.background-color]="getStatusColor(service.status)">
+              {{ getStatusLabel(service.status) }}
+            </span>
+            <span class="service-date">{{ service.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          
+          @if (service.requirements && service.requirements.length > 0) {
+            <div class="service-requirements">
+              <h4>Requisitos:</h4>
+              <ul>
+                @for (req of service.requirements; track req) {
+                  <li>{{ req }}</li>
+                }
+              </ul>
+            </div>
+          }
+          
+          @if (service.deliverables && service.deliverables.length > 0) {
+            <div class="service-deliverables">
+              <h4>Entregáveis:</h4>
+              <ul>
+                @for (del of service.deliverables; track del) {
+                  <li>{{ del }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+      
+      @if (filteredServices.length === 0) {
+        <div class="empty-state">
+          <span class="material-icons">work</span>
+          <h3>Nenhum serviço encontrado</h3>
+          <p>Tente ajustar os filtros ou adicionar um novo serviço.</p>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,233 @@
+<div class="leads">
+  <div class="leads-header">
+    <h1>Leads</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
+        <span class="material-icons">add</span>
+        Novo Lead
+      </button>
+    </div>
+  </div>
+
+  <!-- Add Lead Form -->
+  @if (showAddForm) {
+    <div class="add-form">
+      <div class="form-header">
+        <h3>Adicionar Novo Lead</h3>
+        <button class="close-btn" (click)="showAddForm = false">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="addLead()" class="form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Nome *</label>
+            <input 
+              type="text" 
+              id="name" 
+              [(ngModel)]="newLead.name" 
+              name="name" 
+              required>
+          </div>
+          <div class="form-group">
+            <label for="email">E-mail *</label>
+            <input 
+              type="email" 
+              id="email" 
+              [(ngModel)]="newLead.email" 
+              name="email" 
+              required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Telefone</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              [(ngModel)]="newLead.phone" 
+              name="phone">
+          </div>
+          <div class="form-group">
+            <label for="company">Empresa</label>
+            <input 
+              type="text" 
+              id="company" 
+              [(ngModel)]="newLead.company" 
+              name="company">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" [(ngModel)]="newLead.status" name="status">
+              <option value="new">Novo</option>
+              <option value="contacted">Contatado</option>
+              <option value="qualified">Qualificado</option>
+              <option value="proposal">Proposta</option>
+              <option value="negotiation">Negociação</option>
+              <option value="closed-won">Fechado - Ganho</option>
+              <option value="closed-lost">Fechado - Perdido</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="source">Origem</label>
+            <select id="source" [(ngModel)]="newLead.source" name="source">
+              <option value="website">Website</option>
+              <option value="referral">Indicação</option>
+              <option value="social">Redes Sociais</option>
+              <option value="email">E-mail</option>
+              <option value="phone">Telefone</option>
+              <option value="other">Outro</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="value">Valor</label>
+            <input 
+              type="number" 
+              id="value" 
+              [(ngModel)]="newLead.value" 
+              name="value" 
+              min="0" 
+              step="0.01">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="notes">Observações</label>
+          <textarea 
+            id="notes" 
+            [(ngModel)]="newLead.notes" 
+            name="notes" 
+            rows="3">
+          </textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="showAddForm = false">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Adicionar Lead
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <span class="material-icons">search</span>
+      <input 
+        type="text" 
+        placeholder="Buscar leads..." 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearchChange()">
+    </div>
+    
+    <div class="filter-group">
+      <label for="statusFilter">Status:</label>
+      <select id="statusFilter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+        <option value="all">Todos</option>
+        <option value="new">Novo</option>
+        <option value="contacted">Contatado</option>
+        <option value="qualified">Qualificado</option>
+        <option value="proposal">Proposta</option>
+        <option value="negotiation">Negociação</option>
+        <option value="closed-won">Fechado - Ganho</option>
+        <option value="closed-lost">Fechado - Perdido</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Leads List -->
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando leads...</p>
+    </div>
+  } @else {
+    <div class="leads-list">
+      @for (lead of filteredLeads; track lead.id) {
+        <div class="lead-card">
+          <div class="lead-header">
+            <div class="lead-info">
+              <h3>{{ lead.name }}</h3>
+              <p>{{ lead.company || 'Sem empresa' }}</p>
+            </div>
+            <div class="lead-actions">
+              <select 
+                [value]="lead.status" 
+                (change)="onStatusChange(lead, $event)"
+                class="status-select">
+                <option value="new">Novo</option>
+                <option value="contacted">Contatado</option>
+                <option value="qualified">Qualificado</option>
+                <option value="proposal">Proposta</option>
+                <option value="negotiation">Negociação</option>
+                <option value="closed-won">Fechado - Ganho</option>
+                <option value="closed-lost">Fechado - Perdido</option>
+              </select>
+              <button class="btn-icon" (click)="deleteLead(lead)">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="lead-details">
+            <div class="detail-item">
+              <span class="material-icons">email</span>
+              <span>{{ lead.email }}</span>
+            </div>
+            @if (lead.phone) {
+              <div class="detail-item">
+                <span class="material-icons">phone</span>
+                <span>{{ lead.phone }}</span>
+              </div>
+            }
+            <div class="detail-item">
+              <span class="material-icons">source</span>
+              <span>{{ getSourceLabel(lead.source) }}</span>
+            </div>
+            @if (lead.value && lead.value > 0) {
+              <div class="detail-item">
+                <span class="material-icons">attach_money</span>
+                <span>R$ {{ lead.value | number:'1.2-2' }}</span>
+              </div>
+            }
+          </div>
+          
+          <div class="lead-footer">
+            <span 
+              class="status-badge" 
+              [style.background-color]="getStatusColor(lead.status)">
+              {{ getStatusLabel(lead.status) }}
+            </span>
+            <span class="lead-date">{{ lead.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          
+          @if (lead.notes) {
+            <div class="lead-notes">
+              <p>{{ lead.notes }}</p>
+            </div>
+          }
+        </div>
+      }
+      
+      @if (filteredLeads.length === 0) {
+        <div class="empty-state">
+          <span class="material-icons">person_search</span>
+          <h3>Nenhum lead encontrado</h3>
+          <p>Tente ajustar os filtros ou adicionar um novo lead.</p>
+        </div>
+      }
+    </div>
+  }
+</div>

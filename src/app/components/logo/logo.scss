@@ -1,0 +1,83 @@
+// Logo Component Styles
+.logo-container {
+  display: flex;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
+  
+  &.logo-light {
+    .logo-text {
+      color: white;
+    }
+  }
+  
+  &.logo-dark {
+    .logo-text {
+      color: #0066CC; // Solid blue color
+    }
+  }
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo-main {
+  font-weight: 700;
+  font-size: 1.5em;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.logo-sub {
+  font-weight: 700;
+  font-size: 0.6em;
+  margin-top: -0.1em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+// Size variants
+.logo-small {
+  .logo-main {
+    font-size: 1.2em;
+  }
+  
+  .logo-sub {
+    font-size: 0.5em;
+  }
+}
+
+.logo-medium {
+  .logo-main {
+    font-size: 1.5em;
+  }
+  
+  .logo-sub {
+    font-size: 0.6em;
+  }
+}
+
+.logo-large {
+  .logo-main {
+    font-size: 2em;
+  }
+  
+  .logo-sub {
+    font-size: 0.7em;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .logo-medium {
+    .logo-main {
+      font-size: 1.3em;
+    }
+    
+    .logo-sub {
+      font-size: 0.55em;
+    }
+  }
+}

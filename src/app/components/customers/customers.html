@@ -1,0 +1,207 @@
+<div class="customers">
+  <div class="customers-header">
+    <h1>Clientes</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="showAddForm = !showAddForm">
+        <span class="material-icons">add</span>
+        Novo Cliente
+      </button>
+    </div>
+  </div>
+
+  <!-- Add Customer Form -->
+  @if (showAddForm) {
+    <div class="add-form">
+      <div class="form-header">
+        <h3>Adicionar Novo Cliente</h3>
+        <button class="close-btn" (click)="showAddForm = false">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      
+      <form (ngSubmit)="addCustomer()" class="form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Nome *</label>
+            <input 
+              type="text" 
+              id="name" 
+              [(ngModel)]="newCustomer.name" 
+              name="name" 
+              required>
+          </div>
+          <div class="form-group">
+            <label for="email">E-mail *</label>
+            <input 
+              type="email" 
+              id="email" 
+              [(ngModel)]="newCustomer.email" 
+              name="email" 
+              required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Telefone</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              [(ngModel)]="newCustomer.phone" 
+              name="phone">
+          </div>
+          <div class="form-group">
+            <label for="company">Empresa</label>
+            <input 
+              type="text" 
+              id="company" 
+              [(ngModel)]="newCustomer.company" 
+              name="company">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" [(ngModel)]="newCustomer.status" name="status">
+              <option value="prospect">Prospect</option>
+              <option value="active">Ativo</option>
+              <option value="inactive">Inativo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="industry">Indústria</label>
+            <input 
+              type="text" 
+              id="industry" 
+              [(ngModel)]="newCustomer.industry" 
+              name="industry">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="notes">Observações</label>
+          <textarea 
+            id="notes" 
+            [(ngModel)]="newCustomer.notes" 
+            name="notes" 
+            rows="3">
+          </textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="showAddForm = false">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Adicionar Cliente
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <span class="material-icons">search</span>
+      <input 
+        type="text" 
+        placeholder="Buscar clientes..." 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearchChange()">
+    </div>
+    
+    <div class="filter-group">
+      <label for="statusFilter">Status:</label>
+      <select id="statusFilter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+        <option value="all">Todos</option>
+        <option value="active">Ativo</option>
+        <option value="inactive">Inativo</option>
+        <option value="prospect">Prospect</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Customers List -->
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando clientes...</p>
+    </div>
+  } @else {
+    <div class="customers-list">
+      @for (customer of filteredCustomers; track customer.id) {
+        <div class="customer-card">
+          <div class="customer-header">
+            <div class="customer-info">
+              <h3>{{ customer.name }}</h3>
+              <p>{{ customer.company || 'Sem empresa' }}</p>
+            </div>
+            <div class="customer-actions">
+              <select 
+                [value]="customer.status" 
+                (change)="onStatusChange(customer, $event)"
+                class="status-select">
+                <option value="prospect">Prospect</option>
+                <option value="active">Ativo</option>
+                <option value="inactive">Inativo</option>
+              </select>
+              <button class="btn-icon" (click)="deleteCustomer(customer)">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="customer-details">
+            <div class="detail-item">
+              <span class="material-icons">email</span>
+              <span>{{ customer.email }}</span>
+            </div>
+            @if (customer.phone) {
+              <div class="detail-item">
+                <span class="material-icons">phone</span>
+                <span>{{ customer.phone }}</span>
+              </div>
+            }
+            @if (customer.industry) {
+              <div class="detail-item">
+                <span class="material-icons">business</span>
+                <span>{{ customer.industry }}</span>
+              </div>
+            }
+            @if (customer.totalValue && customer.totalValue > 0) {
+              <div class="detail-item">
+                <span class="material-icons">attach_money</span>
+                <span>R$ {{ customer.totalValue | number:'1.2-2' }}</span>
+              </div>
+            }
+          </div>
+          
+          <div class="customer-footer">
+            <span 
+              class="status-badge" 
+              [style.background-color]="getStatusColor(customer.status)">
+              {{ getStatusLabel(customer.status) }}
+            </span>
+            <span class="customer-date">{{ customer.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          
+          @if (customer.notes) {
+            <div class="customer-notes">
+              <p>{{ customer.notes }}</p>
+            </div>
+          }
+        </div>
+      }
+      
+      @if (filteredCustomers.length === 0) {
+        <div class="empty-state">
+          <span class="material-icons">business</span>
+          <h3>Nenhum cliente encontrado</h3>
+          <p>Tente ajustar os filtros ou adicionar um novo cliente.</p>
+        </div>
+      }
+    </div>
+  }
+</div>
