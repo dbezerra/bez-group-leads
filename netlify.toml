@@ -1,0 +1,8 @@
+[build]
+command = "npm run build:netlify"
+publish = "dist/bez-leads/browser"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
